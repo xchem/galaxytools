@@ -6,6 +6,8 @@
 """
 import matplotlib
 matplotlib.use('Agg')
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 import argparse
 import os
 import chemfp
@@ -69,12 +71,10 @@ https://chemfp.readthedocs.org
     distances  = distance_matrix( arena, args.tanimoto_threshold )
 
     if args.similarity_matrix:
-        distances.tofile( args.similarity_matrix )
+        numpy.savetxt(args.similarity_matrix, distances)
 
     if args.cluster_image:
-        linkage = hcluster.linkage( distances, method="single", metric="euclidean" )
-
-        hcluster.dendrogram(linkage, labels=arena.ids)
-
-        pylab.savefig( args.cluster_image, format=args.oformat )
+        linkage = hcluster.linkage(distances, method="single", metric="euclidean")
+        hcluster.dendrogram(linkage, labels=arena.ids, leaf_rotation=90.)
+        pylab.savefig(args.cluster_image, format=args.oformat)
 

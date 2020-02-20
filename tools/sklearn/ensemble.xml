@@ -14,17 +14,18 @@
         <inputs name="inputs"/>
         <configfile name="ensemble_script">
 <![CDATA[
-import sys
-import os
 import json
 import numpy as np
-import sklearn.ensemble
 import pandas
-from scipy.io import mmread
+import pickle
+import sys
 
-with open("$__tool_directory__/sk_whitelist.json", "r") as f:
-    sk_whitelist = json.load(f)
-exec(open("$__tool_directory__/utils.py").read(), globals())
+from scipy.io import mmread
+import sklearn.ensemble
+from galaxy_ml.utils import load_model, get_X_y
+
+
+N_JOBS = int(__import__('os').environ.get('GALAXY_SLOTS', 1))
 
 # Get inputs, outputs.
 input_json_path = sys.argv[1]
@@ -78,7 +79,7 @@ else:
     with open(infile_model, 'rb') as model_handler:
         classifier_object = load_model(model_handler)
     header = 'infer' if params["selected_tasks"]["header"] else None
-    data = pandas.read_csv(infile_data, sep='\t', header=header, index_col=None, parse_dates=True, encoding=None, tupleize_cols=False)
+    data = pandas.read_csv(infile_data, sep='\t', header=header, index_col=None, parse_dates=True, encoding=None)
     prediction = classifier_object.predict(data)
     prediction_df = pandas.DataFrame(prediction, columns=["predicted"])
     res = pandas.concat([data, prediction_df], axis=1)
